@@ -1,0 +1,18 @@
+{
+  "id": "move_relearner",
+  "name": "Move Relearner",
+  "version": "0.1.0",
+  "api": 2,
+  "entry": "main.lua",
+  "profile": "content",
+  "game_version": ">=0.0.0-dev <1.0.0",
+  "category": "GAMEPLAY",
+  "priority": 100,
+  "dependencies": [],
+  "optional_dependencies": [],
+  "conflicts": [],
+  "incompatible": [],
+  "games": ["gen1"],
+  "experimental": false,
+  "description": "TODO: one line about move_relearner"
+}
