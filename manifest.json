@@ -13,6 +13,7 @@
   "conflicts": [],
   "incompatible": [],
   "games": ["gen1"],
-  "experimental": false,
+  "experimental": true,
+  "permissions": ["engine_internals"],
   "description": "TODO: one line about move_relearner"
 }
