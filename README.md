@@ -1,15 +1,20 @@
-# Move Relearner
+# Better Info
+## [0.5.0] - 2026-09-07
 
-A `content` mod for the LOVE2D Pokemon Red engine (mod api 2).
+This mod aims to give more information, mainly on moves, while staying true to the gen 1 style.
 
-## Layout
+## What does the mod change?
+- **Summary Screen:**
+    - New de-cluttered 3 to 4 page Stats screen with a dedicated page for moves
+    - 4th page with DVs and Stat Exp is toggle-able in the mod options
+    - Moves show their type, power, accuracy and PP
+- **Battle Screen Moves** also show type, power, accuracy and PP
+- Added a **Move Relearner** NPC to Celadon Mansion 2F
 
-- `manifest.json` - identity, version range, load order
-- `main.lua` - the entry chunk; receives the `mod` object
+## Added
+- All features described above
 
-## Loop
-
-1. `POKEPORT_DEV=1 love .` once, leave it running
-2. edit, press F5 to hot-reload, backtick for the dev console
-3. `python3 tools/modkit.py validate move_relearner` before sharing
-4. `python3 tools/modkit.py pack mods/move_relearner` to ship
+## Known Issues
+- Move type badges in battle screen are only colored in the "advanced" (redpp) palette
+- Moves can't be reordered in the summary screen yet
+- Conflicts with other mods not yet known

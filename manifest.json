@@ -1,19 +1,24 @@
 {
-  "id": "move_relearner",
-  "name": "Move Relearner",
-  "version": "0.1.0",
+  "id": "better_info",
+  "name": "Better Info",
+  "version": "0.5.0",
   "api": 2,
   "entry": "main.lua",
-  "profile": "content",
+  "profile": "overhaul",
   "game_version": ">=0.0.0-dev <1.0.0",
-  "category": "GAMEPLAY",
+  "category": "UI",
   "priority": 100,
   "dependencies": [],
   "optional_dependencies": [],
   "conflicts": [],
   "incompatible": [],
-  "games": ["gen1"],
+  "games": [
+    "gen1"
+  ],
   "experimental": true,
-  "permissions": ["engine_internals"],
-  "description": "TODO: one line about move_relearner"
+  "permissions": [
+    "engine_internals"
+  ],
+  "description": "New Summary Screen, Move Stats, Dvs, Stat Exp, Move Relearner",
+  "github": "AlfonsPistoletti/gen1recomp-mod-better-info"
 }
