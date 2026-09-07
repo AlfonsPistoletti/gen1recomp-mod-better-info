@@ -1,5 +1,4 @@
 # Better Info
-## [0.5.0] - 2026-09-07
 
 This mod aims to give more information, mainly on moves, while staying true to the gen 1 style.
 
@@ -11,10 +10,5 @@ This mod aims to give more information, mainly on moves, while staying true to t
 - **Battle Screen Moves** also show type, power, accuracy and PP
 - Added a **Move Relearner** NPC to Celadon Mansion 2F
 
-## Added
-- All features described above
-
-## Known Issues
-- Move type badges in battle screen are only colored in the "advanced" (redpp) palette
-- Moves can't be reordered in the summary screen yet
-- Conflicts with other mods not yet known
+## How to install
+Download the .zip or modpkg and import it in the gen1recomp launcher.

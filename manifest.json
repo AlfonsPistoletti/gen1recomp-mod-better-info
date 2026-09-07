@@ -1,7 +1,7 @@
 {
   "id": "better_info",
   "name": "Better Info",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "api": 2,
   "entry": "main.lua",
   "profile": "overhaul",
