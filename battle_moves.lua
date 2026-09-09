@@ -15,34 +15,58 @@ return function(mod, moveRow)
             power = mdef and mdef.power or 0,
             accuracy = mdef and mdef.accuracy or 0,
             pp = move.pp,
-            effect = mdef and mdef.effect or "",
+            effect = mdef and mdef.effect or ""
         }
     end
 
-    local BOX_X, BOX_Y, BOX_W, BOX_H = 0, 64, 88, 40
+    local NORMAL_X = 0
+    local NORMAL_Y = 56
 
-    local function clearRegion(game)
+    local WIDE_X = 216
+    local WIDE_Y = 96
+
+    local BOX_W = 88
+    local BOX_H = 40
+
+    local function clearRegion(game, x, y, w, h)
         local r, g, b = PaletteFX.paperShade(game.data)
         love.graphics.setColor(r, g, b, 1)
-        love.graphics.rectangle("fill", BOX_X, BOX_Y, BOX_W, BOX_H)
+        love.graphics.rectangle("fill", x, y, w, h)
     end
 
     local function renderMoveDetail(battle)
-        if battle.phase ~= "moveSelect" or battle:isWideBattleLayout() then return end
+
+        local boxX, boxY
+
+        if battle.phase ~= "moveSelect" then
+            return
+        end
         local game = battle.game
         local moves = battle.player and battle.player.curMoves
-        if not moves then return end
+        if not moves then
+            return
+        end
 
-        if battle.player.disabledSlot == battle.moveIndex then return end
+        if battle.player.disabledSlot == battle.moveIndex then
+            return
+        end
 
         local selected = moves[battle.moveIndex]
-        if not selected then return end
+        if not selected then
+            return
+        end
         local entry = moveToEntry(game, selected)
 
-        clearRegion(game)
-        Font.drawBox(0, 7, 11, 6)
+        if battle:isWideBattleLayout() then
+            boxX, boxY = WIDE_X, WIDE_Y
+        else
+            boxX, boxY = NORMAL_X, NORMAL_Y
+        end
 
-        moveRow.drawMoveDetailCard(game, entry, BOX_X + 8, BOX_Y, 4)
+        clearRegion(game, boxX, boxY, 88, 40)
+        Font.drawBox(boxX / 8, boxY / 8, 11, 6)
+
+        moveRow.drawMoveDetailCard(game, entry, boxX + 8, boxY + 8, 4)
     end
 
     mod.hooks:wrap("battle.overlay", function(next, battle)
