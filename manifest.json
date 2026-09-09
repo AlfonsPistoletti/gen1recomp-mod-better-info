@@ -19,6 +19,6 @@
   "permissions": [
     "engine_internals"
   ],
-  "description": "New Summary Screen, Move Stats, Dvs, Stat Exp, Move Relearner",
+  "description": "New Summary Screen, Move Stats, DVs, Stat Exp, Move Relearner",
   "github": "AlfonsPistoletti/gen1recomp-mod-better-info"
 }

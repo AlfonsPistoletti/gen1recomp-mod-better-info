@@ -1,4 +1,9 @@
-# Better Info
+<div align="center">
+
+<img src="assets/logo.png" alt="BetterInfo Logo" width="512"/>
+
+**UI Overhaul Mod for the [Pokémon Gen 1 Recompilation Project](https://github.com/bryanthaboi/pokemon-gen1-recomp-project).**
+</div>
 
 This mod aims to give more information, mainly on moves, while staying true to the gen 1 style.
 
