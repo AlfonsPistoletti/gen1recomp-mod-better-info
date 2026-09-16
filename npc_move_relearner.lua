@@ -148,7 +148,7 @@ return function(mod, moveRow)
                     local entry = list[i]
                     local row = i - scroll
                     local y = startY + (row - 1) * ROW_H
-                    moveRow.drawMoveRow(game, entry, 16, y, self.typeZones)
+                    moveRow.drawMoveRow(game, entry, 16, y, self.typeZones, 142, true)
                 end
 
                 local visibleCount = last - scroll

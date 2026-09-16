@@ -9,12 +9,19 @@ return function(mod, moveRow)
 
     local function moveToEntry(game, move)
         local mdef = moveDef(game, move)
+
+        local maxPP = 0
+        if mdef then
+            maxPP = mdef.pp + (move.ppUps or 0) * math.floor(mdef.pp / 5)
+        end
+
         return {
             move = move.id,
             name = mdef and mdef.name or move.id,
             power = mdef and mdef.power or 0,
             accuracy = mdef and mdef.accuracy or 0,
-            pp = move.pp,
+            currentPP = move.pp,
+            pp = maxPP,
             effect = mdef and mdef.effect or ""
         }
     end

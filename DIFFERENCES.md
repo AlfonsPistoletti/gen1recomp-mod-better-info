@@ -1,10 +1,10 @@
-# [0.5.0] - 2026-09-07
+# [0.6.0] - 2026-09-16
 
 ## Added
-- Basic features
+- Pokedex Overhaul
 
 ## Known Issues
 - Move type badges in battle screen are only colored in the "advanced" (redpp) palette
 - Moves can't be reordered in the summary screen yet
 - Conflicts with other mods not yet known
-- Only works in the OG battle layout right now
+- No print functionality yet

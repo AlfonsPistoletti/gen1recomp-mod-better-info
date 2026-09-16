@@ -1,6 +1,11 @@
 return function(mod)
 
     mod.options:define({{
+        key = "new_pokedex",
+        type = "toggle",
+        label = "NEW POKEDEX",
+        default = true
+    }, {
         key = "new_summary_menu",
         type = "toggle",
         label = "NEW SUMMARY MENU",
@@ -9,20 +14,18 @@ return function(mod)
         key = "show_extended_tab",
         type = "toggle",
         label = "ADDIT. INFO",
-        default = false
+        default = true
+    }, {
+        key = "battle_moves",
+        type = "toggle",
+        label = "BATTLE MOVE INFO",
+        default = true
     }, {
         key = "enable_move_relearner",
         type = "toggle",
         label = "MOVE RELEARNER",
         default = true
-    },
-{
-        key = "battle_moves",
-        type = "toggle",
-        label = "BATTLE MOVE INFO",
-        default = true
-    }
-})
+    }})
 
     local function loadFactory(filename)
         local source, readErr = mod:read(filename)
@@ -45,26 +48,31 @@ return function(mod)
         return factory
     end
 
-    local makeColors = loadFactory("colors.lua")
     local makeHudHelpers = loadFactory("hud_helpers.lua")
     local makeMoveRow = loadFactory("move_row.lua")
-    
-    local colors = makeColors(mod)
+
     local hudHelpers = makeHudHelpers(mod)
-    local moveRow = makeMoveRow(mod, colors)
-    
+    local moveRow = makeMoveRow(mod)
+
     if mod.options:get("new_summary_menu") then
         local makeSummaryMenu = loadFactory("summary_menu.lua")
         makeSummaryMenu(mod, hudHelpers, moveRow)
     end
-    
+
     if mod.options:get("enable_move_relearner") then
         local makeNpc = loadFactory("npc_move_relearner.lua")
         makeNpc(mod, moveRow)
     end
-    
+
     if mod.options:get("battle_moves") then
         local battleMoves = loadFactory("battle_moves.lua")
         battleMoves(mod, moveRow)
+    end
+
+    if mod.options:get("new_pokedex") then
+        local pokedex = loadFactory("pokedex.lua")
+        local dexEntry = loadFactory("dex_entry.lua")
+        dexEntry(mod, moveRow)
+        pokedex(mod)
     end
 end

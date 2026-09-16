@@ -8,6 +8,7 @@ return function(mod, hudHelpers, moveRow)
     local Strings = require("src.core.Strings")
     local Growth = require("src.pokemon.Growth")
     local PaletteFX = require("src.render.PaletteFX")
+    local Colors = require("mods.better_info.Colors")
 
     mod.content.screens:override("SummaryMenu", {
         new = function(game, mon)
@@ -20,18 +21,40 @@ return function(mod, hudHelpers, moveRow)
 
             function self:sgbPalettes(game)
                 local P = require("src.render.PaletteFX")
-                local mon = self.mon
 
-                if not mon then
-                    return P.wholeNamed(game.data, "MEWMON")
-                end
-
-                local bar = P.pal(game.data, P.barPalName(mon.hp, mon.stats.hp))
-                if not bar then
+                local base = P.pal(game.data, "GRAYMON")
+                if not base then
                     return nil
                 end
 
-                local zones = {P.whole(bar), P.zone(P.monPal(game.data, mon.species), 0, 0, 7, 7)}
+                -- Entire Summary screen starts as neutral GRAYMON.
+                local zones = {P.whole(base)}
+
+                -- Pokémon sprite palette.
+                if self.mon then
+                    local monPal = P.monPal(game.data, self.mon.species)
+                    if monPal then
+                        table.insert(zones, P.zone(monPal, 0, 0, 7, 7))
+                    end
+                end
+
+                -- HP bar palette.
+                if self.mon then
+                    local barPalName = P.barPalName(self.mon.hp, self.mon.stats.hp)
+
+                    local barPal = P.pal(game.data, barPalName)
+                    if barPal then
+                        table.insert(zones, {
+                            colors = barPal,
+                            x = 88,
+                            y = 24,
+                            w = 64,
+                            h = 8
+                        })
+                    end
+                end
+
+                -- Type badges / other dynamically colored regions.
                 for _, z in ipairs(self.typeZones or {}) do
                     local colors = P.pal(game.data, z.paletteName)
                     if colors then
@@ -44,10 +67,25 @@ return function(mod, hudHelpers, moveRow)
                         })
                     end
                 end
+
+                -- stat exp
+                for _, z in ipairs(self.statZones or {}) do
+                    local colors = P.pal(game.data, z.paletteName)
+                    if colors then
+                        table.insert(zones, {
+                            colors = colors,
+                            x = z.x,
+                            y = z.y,
+                            w = z.w,
+                            h = z.h
+                        })
+                    end
+                end
+
                 return zones
             end
 
-            -- Sprite einmalig laden und cachen
+            -- load pkmn sprite and cache
             local path, trueColor = Sprites.path(game.data, mon.species, "front", {
                 mon = mon,
                 kind = "summary"
@@ -84,22 +122,31 @@ return function(mod, hudHelpers, moveRow)
                 end
 
                 hudHelpers.drawLineBox(19, 0, 5, 8)
-
-                local barZoned = PaletteFX.shader() ~= nil and PaletteFX.pal(game.data, "GREENBAR") ~= nil
-                HudTiles.drawHPBar(game.data, 11, 3, mon, 1, barZoned) -- wHPBarType 1
+                HudTiles.drawHPBar(game.data, 11, 3, mon, 1, true) -- wHPBarType 1
                 Font.draw(("%3d/%3d"):format(mon.hp, mon.stats.hp), 96, 32)
             end
 
             local function moveToEntry(data, mv)
                 local mdef = data.moves[mv.id]
+                local maxPP = 0
+                if mdef then
+                    maxPP = mdef.pp + (mv.ppUps or 0) * math.floor(mdef.pp / 5)
+                end
+
                 return {
                     move = mv.id,
                     name = mdef and mdef.name or mv.id,
                     power = mdef and mdef.power or 0,
                     accuracy = mdef and mdef.accuracy or 0,
-                    pp = mv.pp,
+
+                    -- Current PP
+                    currentPP = mv.pp,
+
+                    -- Max PP including PP Ups
+                    pp = maxPP,
                     effect = mdef and mdef.effect or ""
                 }
+
             end
 
             -- statExp = 65535 (sqrt(65535)/4 ~= 63.9998)
@@ -110,23 +157,46 @@ return function(mod, hudHelpers, moveRow)
             local STAT_EXP_BONUS_MAX = 64
             local STAT_EXP_MAX = 65535
 
-            local function drawStatExpBar(label, statExp, x, y, barW)
-                Font.draw(("%3s"):format(label), x, y)
+            local function drawStatExpBar(stat, statExp, x, y, barW, zoneSink)
+                local statName = Colors.statName(stat)
+                Font.draw(("%3s"):format(statName), x, y)
 
                 local bonus = statExpBonus(statExp)
                 local fraction = math.min(1, bonus / STAT_EXP_BONUS_MAX)
-                -- am tatsächlichen Maximum explizit auf 100%, wegen Rundungsfehler
+
+                -- Am tatsächlichen Maximum explizit auf 100%.
                 if (statExp or 0) >= STAT_EXP_MAX then
                     fraction = 1
                 end
 
                 local barX = x + 26
+
+                -- Background
                 love.graphics.setColor(0, 0, 0, 1)
                 love.graphics.rectangle("fill", barX, y + 1, barW, 4)
-                love.graphics.setColor(0.8, 0.5, 1, 1)
-                love.graphics.rectangle("fill", barX + 1, y + 2, math.floor((barW - 2) * fraction), 2)
+
+                -- EXP fill
+                local fillW = math.floor((barW - 2) * fraction)
+                if fillW > 0 then
+                    love.graphics.setColor(170 / 255, 170 / 255, 170 / 255, 1)
+                    love.graphics.rectangle("fill", barX + 1, y + 2, fillW, 2)
+                end
+
+                -- Stat-Palette
+                local color = Colors.statPalette(stat)
+                if color and color.paletteName and zoneSink then
+                    table.insert(zoneSink, {
+                        x = barX,
+                        y = y + 1,
+                        w = barW,
+                        h = 4,
+                        paletteName = color.paletteName
+                    })
+                end
+
                 love.graphics.setColor(1, 1, 1, 1)
 
+                -- EXP value
                 Font.draw(tostring(statExp or 0), barX + barW + 4, y)
             end
 
@@ -184,7 +254,7 @@ return function(mod, hudHelpers, moveRow)
                     local mv = mon.moves[i]
                     local entry = mv and moveToEntry(game.data, mv)
                     local y = startY + (i - 1) * moveRow.ROW_H
-                    moveRow.drawMoveRow(game, entry, 16, y, self.typeZones)
+                    moveRow.drawMoveRow(game, entry, 12, y, self.typeZones, 142, false)
                 end
             end
 
@@ -236,24 +306,26 @@ return function(mod, hudHelpers, moveRow)
 
             -- Tab 4: Extended: Stat Exp
             local function drawTabExtended(game, mon)
+                self.statZones = {}
                 Font.drawBox(0, 8, 20, 10)
 
                 local x = 12
                 local y = 76
                 local gap = 10
 
+                local statExp = mon.statExp or {}
+
                 Font.draw("STAT EXP", x, y)
                 y = y + gap
-                drawStatExpBar("HP", mon.statExp.hp, x, y, 64);
+                drawStatExpBar("hp", statExp.hp, x, y, 64, self.statZones)
                 y = y + gap
-                drawStatExpBar("ATK", mon.statExp.attack, x, y, 64);
+                drawStatExpBar("attack", statExp.attack, x, y, 64, self.statZones)
                 y = y + gap
-                drawStatExpBar("DEF", mon.statExp.defense, x, y, 64);
+                drawStatExpBar("defense", statExp.defense, x, y, 64, self.statZones)
                 y = y + gap
-                drawStatExpBar("SPE", mon.statExp.speed, x, y, 64);
+                drawStatExpBar("speed", statExp.speed, x, y, 64, self.statZones)
                 y = y + gap
-                drawStatExpBar("SPC", mon.statExp.special, x, y, 64);
-                y = y + gap
+                drawStatExpBar("special", statExp.special, x, y, 64, self.statZones)
             end
 
             local tab = 1
