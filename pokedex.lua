@@ -139,12 +139,12 @@ return function(mod)
 
         -- Owned
         love.graphics.setColor(0, 0, 0, 1)
-        Font.draw("OWN", x, y)
+        Font.draw(Strings("OWN"), x, y)
         Font.draw(("%3s"):format(self.ownedCount), x + 36, y)
 
         -- Seen
         love.graphics.setColor(0, 0, 0, 1)
-        Font.draw("SEEN", x, y + 8)
+        Font.draw(Strings("SEEN"), x, y + 8)
         Font.draw(("%3s"):format(self.seenCount), x + 36, y + 8)
     end
 
@@ -163,7 +163,7 @@ return function(mod)
         local mon = {
             species = species.id
         }
-        local path = Sprites.path(self.game.data, species.id, "front", {
+        local path, trueColor = Sprites.path(self.game.data, species.id, "front", {
             mon = mon,
             kind = "summary"
         })
@@ -183,7 +183,7 @@ return function(mod)
         local y = areaY + math.floor((areaH - ih) / 2)
 
         -- palette 
-        if self.game.save.options.colors == "redpp" and trueColor then
+        if trueColor then
             PaletteFX.markTrueColor(x, y, iw, ih)
         else
             local monColors = PaletteFX.monPal(self.game.data, species.id)
@@ -247,18 +247,21 @@ return function(mod)
         Font.draw(speciesName, 92, 88)
     end
 
+    -- check if icon is trueColor
+    local function iconIsTrueColor(game, species)
+        local icons = game.data.icons or {}
+        local def = game.data.pokemon[species]
+        local entry = (icons.bySpecies and icons.bySpecies[species]) or (def and def.icon)
+        if type(entry) == "table" then
+            local path = tostring(entry.image or ""):lower()
+            local paletteAware = path:find("icons_original", 1, true) ~= nil or path:find("icon_original", 1, true) ~=
+                                     nil
+            return not paletteAware
+        end
+        return false
+    end
+
     function PokedexMenu:drawCell(species, index, x, y)
-        local num = string.format("%03d", species.dex)
-
-        -- miniature sprite
-        local mon = {
-            species = species.id,
-            hp = 1,
-            stats = {
-                hp = 1
-            }
-        }
-
         love.graphics.setColor(1, 1, 1, 1)
 
         if self:isSeen(species.id) then
@@ -271,15 +274,19 @@ return function(mod)
             }
             PartyMenu.drawIcon(self.game, mon, x + 8, y, index == self.index, self.counter)
 
-            local monColors = PaletteFX.monPal(self.game.data, species.id)
-            if monColors then
-                table.insert(self.zones, {
-                    colors = monColors,
-                    x = x,
-                    y = y,
-                    w = 24,
-                    h = 18
-                })
+            if iconIsTrueColor(self.game, species.id) then
+                PaletteFX.markTrueColor(x, y, 24, 18)
+            else
+                local monColors = PaletteFX.monPal(self.game.data, species.id)
+                if monColors then
+                    table.insert(self.zones, {
+                        colors = monColors,
+                        x = x,
+                        y = y,
+                        w = 24,
+                        h = 18
+                    })
+                end
             end
         else
             love.graphics.setColor(0, 0, 0, 1)
@@ -290,7 +297,6 @@ return function(mod)
             love.graphics.draw(BALL_ICON, x + 1, y)
         end
 
-        -- cursor
         if index == self.index then
             Font.drawCode(Theme.cursor, x + 1, y + 6)
         end
