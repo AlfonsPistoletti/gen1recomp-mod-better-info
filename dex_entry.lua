@@ -1,4 +1,4 @@
-return function(mod, moveRow)
+return function(mod, hudHelpers, moveRow)
     local Font = require("src.render.Font")
     local Theme = require("src.ui.Theme")
     local HudTiles = require("src.render.HudTiles")
@@ -9,21 +9,18 @@ return function(mod, moveRow)
     local PaletteFX = require("src.render.PaletteFX")
     local Colors = require("mods.better_info.Colors")
     local MapView = require("mods.better_info.map")
+    local CrystalAnim = require("mods.better_info.crystal_anim")
 
     local DexEntryMenu = {}
     DexEntryMenu.__index = DexEntryMenu
     DexEntryMenu.isOpaque = true
 
-    local function loadIcon(relPath)
-        local ok, img = pcall(love.graphics.newImage, mod.assets:path(relPath))
-        return ok and img or nil
-    end
+    local ARROW_ICON = hudHelpers.loadIcon("assets/icons/arrow.png")
+    local HINT_INFO = hudHelpers.loadIcon("assets/icons/hint_info.png")
+    local HINT_STATS = hudHelpers.loadIcon("assets/icons/hint_stats.png")
+    local HINT_MOVES = hudHelpers.loadIcon("assets/icons/hint_moves.png")
+    local HINT_AREA = hudHelpers.loadIcon("assets/icons/hint_area.png")
 
-    local ARROW_ICON = loadIcon("assets/icons/arrow.png")
-    local HINT_INFO = loadIcon("assets/icons/hint_info.png")
-    local HINT_STATS = loadIcon("assets/icons/hint_stats.png")
-    local HINT_MOVES = loadIcon("assets/icons/hint_moves.png")
-    local HINT_AREA = loadIcon("assets/icons/hint_area.png")
 
     local function dividerCodes()
         local codes = {
@@ -379,11 +376,6 @@ return function(mod, moveRow)
 
         self.moveScroll = 1
 
-        print("levelUpMoves count:", #self.levelUpMoves)
-        for i, entry in ipairs(self.levelUpMoves) do
-            print(i, entry.level, entry.move, entry.name)
-        end
-
         local path, trueColor = require("src.pokemon.Sprites").path(game.data, species, "front", {
             kind = "dex"
         })
@@ -394,6 +386,10 @@ return function(mod, moveRow)
         end
         self.sprite = ok and img or nil
         self.spriteTrueColor = self.sprite and trueColor or false
+        self.spriteFrames = self.sprite
+            and CrystalAnim.resolveFrames(path, self.sprite) or nil
+        self.spriteAnimStart = (love.timer and love.timer.getTime
+            and love.timer.getTime()) or 0
 
         self.blink = 0
         self.tab = 1
@@ -635,6 +631,11 @@ return function(mod, moveRow)
     local TAB_COUNT = #TAB_DRAW
 
     function DexEntryMenu:update(dt)
+        if self.spriteFrames then
+            self.sprite = CrystalAnim.frameForTime(self.spriteFrames,
+                self.spriteAnimStart, CrystalAnim.playOnce(self.game))
+        end
+
         -- play cry after delay
         if (self.picDelay or 0) > 0 then
             self.picDelay = self.picDelay - 1

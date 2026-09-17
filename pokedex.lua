@@ -1,4 +1,4 @@
-return function(mod)
+return function(mod, hudHelpers)
     local Strings = require("src.core.Strings")
     local Theme = require("src.ui.Theme")
     local Font = require("src.render.Font")
@@ -28,15 +28,10 @@ return function(mod)
     local GRID_X = 2
     local GRID_Y = 0
 
-    local function loadIcon(relPath)
-        local ok, img = pcall(love.graphics.newImage, mod.assets:path(relPath))
-        return ok and img or nil
-    end
-
-    local SEEN_ICON = loadIcon("assets/icons/seen.png")
-    local BALL_ICON = loadIcon("assets/icons/ball.png")
-    local START_ICON = loadIcon("assets/icons/hint_start.png")
-    local SELECT_ICON = loadIcon("assets/icons/hint_select.png")
+    local SEEN_ICON = hudHelpers.loadIcon("assets/icons/seen.png")
+    local BALL_ICON = hudHelpers.loadIcon("assets/icons/ball.png")
+    local START_ICON = hudHelpers.loadIcon("assets/icons/hint_start.png")
+    local SELECT_ICON = hudHelpers.loadIcon("assets/icons/hint_select.png")
 
     local function dividerCodes()
         local codes = {
@@ -171,7 +166,18 @@ return function(mod)
             return
         end
 
-        local image = love.graphics.newImage(path)
+        local cached = self.spriteCache[path]
+        local image
+        if cached ~= nil then
+            image = cached or nil
+        else
+            local ok, img = pcall(love.graphics.newImage, path)
+            image = ok and img or nil
+            self.spriteCache[path] = image or false
+        end
+        if not image then
+            return
+        end
         local iw, ih = image:getDimensions()
 
         local areaX = 92
@@ -247,18 +253,29 @@ return function(mod)
         Font.draw(speciesName, 92, 88)
     end
 
-    -- check if icon is trueColor
+    -- check if icon is trueColor.  Prefers the documented per-entry field
+    -- (src/ui/PartyMenu.lua reads entry.trueColor the same way before
+    -- handing it to Sprites.iconPath), but "Unique Menu Icons" -- a
+    -- companion mod listed in this mod's README -- never sets that field
+    -- at all: its ICON COLOR MODE lives in its own mod options, and it
+    -- marks trueColor out-of-band by wrapping PartyMenu:draw() /
+    -- GoldPartyMenu.drawIcon() and calling PaletteFX.markTrueColor()
+    -- directly for the party list. That wrap never reaches this grid (a
+    -- different screen, its own cell coordinates), so the one signal that
+    -- DOES reach us either way is the resolved image path: that mod's
+    -- ORIGINAL mode art lives under assets/icon_original/ and rides the
+    -- normal palette recolor like vanilla icons; its other two modes'
+    -- art is full/duotone color and must not be recolored.
     local function iconIsTrueColor(game, species)
         local icons = game.data.icons or {}
         local def = game.data.pokemon[species]
         local entry = (icons.bySpecies and icons.bySpecies[species]) or (def and def.icon)
-        if type(entry) == "table" then
-            local path = tostring(entry.image or ""):lower()
-            local paletteAware = path:find("icons_original", 1, true) ~= nil or path:find("icon_original", 1, true) ~=
-                                     nil
-            return not paletteAware
-        end
-        return false
+        if type(entry) ~= "table" then return false end
+        if entry.trueColor == true then return true end
+        local path = tostring(entry.image or ""):lower()
+        local paletteAware = path:find("icons_original", 1, true) ~= nil
+            or path:find("icon_original", 1, true) ~= nil
+        return not paletteAware
     end
 
     function PokedexMenu:drawCell(species, index, x, y)

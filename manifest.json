@@ -1,15 +1,15 @@
 {
   "id": "better_info",
   "name": "Better Info",
-  "version": "0.6.2",
+  "version": "0.6.5",
   "api": 2,
   "entry": "main.lua",
   "profile": "overhaul",
   "game_version": ">=0.0.0-dev <1.0.0",
   "category": "UI",
-  "priority": 130,
+  "priority": 1000,
   "dependencies": [],
-  "optional_dependencies": ["unique_menu_icons"],
+  "optional_dependencies": ["crystal_animated_sprites_with_shiny_visuals"],
   "conflicts": ["kanto_ascendant", "modern_pokedex_ui"],
   "incompatible": [],
   "games": [

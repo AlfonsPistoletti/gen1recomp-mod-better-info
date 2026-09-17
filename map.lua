@@ -147,15 +147,6 @@ function MapView:draw(x, y, scale)
         love.graphics.draw(self.bg.img, self.bg.quads[tile], col * 8, row * 8)
     end
 
-    -- show nest areas blinking
-    local showNest
-
-    if GameVersion.generation() == 1 then
-        showNest = self.blink < 25
-    else
-        showNest = self.blink % 16 < 10
-    end
-
     -- No nests
     if #self.nests == 0 then
         Font.drawBox(1, 7, 17, 4)

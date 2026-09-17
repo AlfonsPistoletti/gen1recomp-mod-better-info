@@ -25,6 +25,11 @@ return function(mod)
         type = "toggle",
         label = "MOVE RELEARNER",
         default = true
+    }, {
+        key = "party_icon_colors",
+        type = "toggle",
+        label = "PARTY ICON COLORS",
+        default = true
     }})
 
     local function loadFactory(filename)
@@ -48,31 +53,43 @@ return function(mod)
         return factory
     end
 
-    local makeHudHelpers = loadFactory("hud_helpers.lua")
-    local makeMoveRow = loadFactory("move_row.lua")
+    -- A broken sub-file must only cost that one feature, matching
+    -- loadFactory's own isolation design: a missing/uncompilable file is
+    -- already handled by loadFactory returning nil, and this also guards
+    -- the factory CALL itself (a runtime error while it installs its
+    -- hooks/screens) so neither failure mode can crash the rest of the mod.
+    local function runModule(filename, ...)
+        local factory = loadFactory(filename)
+        if not factory then return nil end
+        local ok, result = pcall(factory, ...)
+        if not ok then
+            mod.log:error("%s failed to load: %s", filename, tostring(result))
+            return nil
+        end
+        return result
+    end
 
-    local hudHelpers = makeHudHelpers(mod)
-    local moveRow = makeMoveRow(mod)
+    local hudHelpers = runModule("hud_helpers.lua", mod)
+    local moveRow = runModule("move_row.lua", mod, hudHelpers)
 
     if mod.options:get("new_summary_menu") then
-        local makeSummaryMenu = loadFactory("summary_menu.lua")
-        makeSummaryMenu(mod, hudHelpers, moveRow)
+        runModule("summary_menu.lua", mod, hudHelpers, moveRow)
     end
 
     if mod.options:get("enable_move_relearner") then
-        local makeNpc = loadFactory("npc_move_relearner.lua")
-        makeNpc(mod, moveRow)
+        runModule("npc_move_relearner.lua", mod, moveRow)
     end
 
     if mod.options:get("battle_moves") then
-        local battleMoves = loadFactory("battle_moves.lua")
-        battleMoves(mod, moveRow)
+        runModule("battle_moves.lua", mod, moveRow)
     end
 
     if mod.options:get("new_pokedex") then
-        local pokedex = loadFactory("pokedex.lua")
-        local dexEntry = loadFactory("dex_entry.lua")
-        dexEntry(mod, moveRow)
-        pokedex(mod)
+        runModule("dex_entry.lua", mod, hudHelpers, moveRow)
+        runModule("pokedex.lua", mod, hudHelpers)
+    end
+
+    if mod.options:get("party_icon_colors") then
+        runModule("party_icons.lua", mod)
     end
 end

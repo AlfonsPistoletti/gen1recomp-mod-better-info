@@ -9,6 +9,7 @@ return function(mod, hudHelpers, moveRow)
     local Growth = require("src.pokemon.Growth")
     local PaletteFX = require("src.render.PaletteFX")
     local Colors = require("mods.better_info.Colors")
+    local CrystalAnim = require("mods.better_info.crystal_anim")
 
     mod.content.screens:override("SummaryMenu", {
         new = function(game, mon)
@@ -95,6 +96,10 @@ return function(mod, hudHelpers, moveRow)
                 self.sprite = ok and img or nil
             end
             self.spriteTrueColor = self.sprite and trueColor or false
+            self.spriteFrames = self.sprite
+                and CrystalAnim.resolveFrames(path, self.sprite) or nil
+            self.spriteAnimStart = (love.timer and love.timer.getTime
+                and love.timer.getTime()) or 0
 
             require("src.core.Sound").playCry(game.data, mon.species)
 
@@ -361,6 +366,11 @@ return function(mod, hudHelpers, moveRow)
             end
 
             function self:update(dt)
+                if self.spriteFrames then
+                    self.sprite = CrystalAnim.frameForTime(self.spriteFrames,
+                        self.spriteAnimStart, CrystalAnim.playOnce(self.game))
+                end
+
                 if game.input:wasPressed("left") then
                     tab = tab > 1 and tab - 1 or #TAB_NAMES
                 elseif game.input:wasPressed("right") then

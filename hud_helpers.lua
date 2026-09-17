@@ -27,5 +27,12 @@ return function(mod)
         HudTiles.statusTile(0x6F, (tx - c - 1) * 8, (ty + b) * 8)
     end
 
-    return { printLevel = printLevel, drawLineBox = drawLineBox }
+    -- Shared by dex_entry.lua, pokedex.lua, and move_row.lua: a mod-relative
+    -- asset image, or nil (never a raised error) if the file is missing.
+    local function loadIcon(relPath)
+        local ok, img = pcall(love.graphics.newImage, mod.assets:path(relPath))
+        return ok and img or nil
+    end
+
+    return { printLevel = printLevel, drawLineBox = drawLineBox, loadIcon = loadIcon }
 end

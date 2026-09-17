@@ -1,5 +1,5 @@
 -- Draws the move rows with additional info
-return function(mod)
+return function(mod, hudHelpers)
     local Font = require("src.render.Font")
     local PaletteFX = require("src.render.PaletteFX")
     local Colors = require("mods.better_info.Colors")
@@ -15,13 +15,8 @@ return function(mod)
     local ROW_H = 19
     local NAME_H = 8
 
-    local function loadIcon(relPath)
-        local ok, img = pcall(love.graphics.newImage, mod.assets:path(relPath))
-        return ok and img or nil
-    end
-
-    local POWER_ICON = loadIcon("assets/icons/power.png")
-    local ACCURACY_ICON = loadIcon("assets/icons/accuracy.png")
+    local POWER_ICON = hudHelpers.loadIcon("assets/icons/power.png")
+    local ACCURACY_ICON = hudHelpers.loadIcon("assets/icons/accuracy.png")
 
     local function truncateName(name)
         if #name > NAME_MAX_CHARS then
@@ -43,8 +38,6 @@ return function(mod)
         return move.power
     end
 
-    local DEX_GAP = 8
-    local SUMMARY_GAP = 16
     local function drawMoveRow(game, entry, textX, y, zoneSink, totalW, dex)
         local g = love.graphics
 
@@ -89,9 +82,6 @@ return function(mod)
 
         local DEX_GAP = 8
         local SUMMARY_GAP = 9
-
-        local powerIconW = POWER_ICON and POWER_ICON:getWidth() or ICON_W
-        local accIconW = ACCURACY_ICON and ACCURACY_ICON:getWidth() or ICON_W
 
         local col1, col2, col3, col4, col5
 

@@ -1,0 +1,33 @@
+return {
+  summary = "Pokedex, Summary, and Party screen overhaul with battle move details and a move relearner NPC.",
+  author = "AlfonsPistoletti",
+  contact = "https://github.com/AlfonsPistoletti/gen1recomp-mod-better-info",
+  tags = { "ui", "quality-of-life", "pokedex", "battle", "party" },
+  differences = {
+    changed = {
+      "The Pokedex screen has an expandable grid layout",
+      "the Dex Entry screen gains STATS / MOVES / AREA tabs alongside the info page",
+      "the Summary screen is rebuilt into its own tabbed layout, including a dedicated moves page",
+      "battle and Summary move rows show type, power, accuracy, and PP",
+      "party-list icons take their own species palette instead of the vanilla single shared zone",
+    },
+    added = {
+      "a battle move detail card while selecting a move",
+      "a Move Relearner NPC in Celadon Mansion 2F",
+      "NEW POKEDEX, NEW SUMMARY MENU, BATTLE MOVE INFO, MOVE RELEARNER, ADDIT. INFO, "
+        .. "and PARTY ICON COLORS options",
+    },
+    known = {
+      "most options only take effect after a restart (NEW POKEDEX / NEW SUMMARY MENU "
+        .. "replace a vanilla screen, and MOVE RELEARNER patches map content, both at load time)",
+      "when Crystal Animated Sprites with Shiny Visuals is also installed, its animated "
+        .. "sprites still play correctly in the Pokedex and Summary screens via a small "
+        .. "compatibility shim, since this mod replaces those screens outright",
+    },
+  },
+  credits = {
+    { who = "AlfonsPistoletti", for_ = "all icon and logo art in assets/" },
+    { who = "pret/pokered", for_ = "the Gen 1 Pokedex, Summary, and Party menu conventions this mod extends" },
+  },
+  compat = { engine = ">=0.0.0-dev <1.0.0", modApi = 2 },
+}
